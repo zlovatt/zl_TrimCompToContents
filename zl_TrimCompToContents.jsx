@@ -4,7 +4,7 @@
     zack@zacklovatt.com
  
     Name: zl_TrimCompToContents
-    Version: 0.9
+    Version: 1.0
  
     Description:
         This script trims or lengthens your current comp to the in & out

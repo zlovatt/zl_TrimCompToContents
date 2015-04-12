@@ -26,18 +26,18 @@
     var zl_TCC__preserveCompStart = false;
     var zl_TCC__useAll = false;
     
-	/****************************** 
+    /****************************** 
         zl_TrimCompToContents()
-	
+    
         Description:
         This function contains the main logic for this script.
-	 
+     
         Parameters:
         thisObj - "this" object.
-	 
+     
         Returns:
         Nothing.
-	******************************/
+    ******************************/
     function zl_TrimCompToContents(thisObj){
 
         var thisComp = app.project.activeItem;
@@ -117,7 +117,8 @@
         } else {
             thisComp.displayStartTime = 0;
         }
-    }
+        
+    } // end function TrimCompToContents
 
 
     /****************************** 
@@ -140,7 +141,8 @@
                 layerIndex = i;
 
         return targetLayers[layerIndex].inPoint;
-    }
+        
+    } // end function getInTime
 
 
     /****************************** 
@@ -163,7 +165,7 @@
                 layerIndex = i;
                 
         return targetLayers[layerIndex].outPoint;
-    }
+    } // end function getOutTime
 
 
     /****************************** 
@@ -192,7 +194,7 @@
 
             targetLayers[i].startTime = totalFrames/compFPS;
         }
-    }
+    } // end function shiftLayers
 
     /****************************** 
         zl_TrimCompToContents_main()

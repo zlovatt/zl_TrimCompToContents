@@ -36,4 +36,3 @@ If the ScriptUI Panels folder does not exist, create it.
 * 1.2	- 10/02/14 - Preserve start time bug fixed, headless controls now work properly
 * 1.1	- Cleaned up code, improved headless version
 * 1.0	- Initial Release
-* 1.0	- Initial Release
