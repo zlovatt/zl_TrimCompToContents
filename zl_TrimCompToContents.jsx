@@ -4,7 +4,7 @@
     zack@zacklovatt.com
  
     Name: zl_TrimCompToContents
-    Version: 1.2
+    Version: 1.3
  
     Description:
         This script trims or lengthens your current comp to the in & out
@@ -101,6 +101,7 @@
             thisComp.workAreaDuration = newDur;
             
             app.executeCommand(app.findMenuCommandId("Trim Comp to Work Area"));
+            app.executeCommand(2360);
 
             // Re-lock those locked layers
             if (useAll == true)
