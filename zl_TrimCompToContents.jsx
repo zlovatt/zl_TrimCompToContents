@@ -1,10 +1,10 @@
 ﻿/**********************************************************************************************
     zl_TrimCompToContents
     Copyright (c) 2013 Zack Lovatt. All rights reserved.
-    zacklovatt.com
+    zack@zacklovatt.com
  
     Name: zl_TrimCompToContents
-    Version: 0.7
+    Version: 0.9
  
     Description:
         This script trims or lengthens your current comp to the in & out
@@ -21,7 +21,8 @@
     var zl_TCC__ignoreLocked = false;
     var zl_TCC__preserveCompStart = false;
     var zl_TCC__useAll = true;
-    
+    var zl_TCC__scriptName = "zl_TrimCompToContents";
+            
     /****************************** 
         zl_TrimCompToContents()
     
@@ -113,7 +114,7 @@
         } else {
             thisComp.displayStartTime = 0;
         }
-    }
+    } // end function TrimCompToContents
 
 
     /****************************** 
@@ -136,7 +137,7 @@
                 layerIndex = i;
 
         return targetLayers[layerIndex].inPoint;
-    }
+    } // end function getInTime
 
 
     /****************************** 
@@ -159,7 +160,7 @@
                 layerIndex = i;
                 
         return targetLayers[layerIndex].outPoint;
-    }
+    } // end function getOutTime
 
 
     /****************************** 
@@ -188,7 +189,7 @@
 
             targetLayers[i].startTime = totalFrames/compFPS;
         }
-    }
+    } // end function shiftLayers
 
 
     /****************************** 
@@ -205,17 +206,17 @@
         Nothing
      ******************************/
     function zl_TrimCompToContents_createPalette(thisObj) { 
-        var win = (thisObj instanceof Panel) ? thisObj : new Window('palette', 'Script Window',[357,241,607,418]); 
+        var win = (thisObj instanceof Panel) ? thisObj : new Window('palette', 'Trim Comp to Contents',[357,241,607,418]); 
 
-        { // Trim Buttons
-            
-            win.trimSelectedButton = win.add('button', [22,19,226,45], 'Trim Comp'); 
+        { // Buttons
+            win.trimSelectedButton = win.add('button', [12,19,216,45], 'Trim Comp'); 
             win.trimSelectedButton.onClick = function () {
                 if (app.project) {
                     var activeItem = app.project.activeItem;
+                    
                     if (activeItem != null && (activeItem instanceof CompItem)) {
                         app.beginUndoGroup(zl_TCC__scriptName);
-                        zl_TrimCompToContents(thisObj, false);
+                        zl_TrimCompToContents(thisObj);
                         app.endUndoGroup();
                     } else {
                         alert("Select an active comp!", zl_TCC__scriptName);
@@ -271,10 +272,8 @@
         Nothing
      ******************************/
     function zl_TrimCompToContents_main(thisObj) {
-        var zl_TCC__scriptName = "zl_TrimCompToContents";
-
         zl_TrimCompToContents_createPalette(thisObj);
-    }
+    } // end function main
 
     // RUN!
     // zl_TrimCompToContents(this); // <= This runs the script with default options, usually for debug
