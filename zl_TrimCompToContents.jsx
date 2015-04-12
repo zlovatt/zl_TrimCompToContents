@@ -4,7 +4,7 @@
     zack@zacklovatt.com
  
     Name: zl_TrimCompToContents
-    Version: 1.1
+    Version: 1.2
  
     Description:
         This script trims or lengthens your current comp to the in & out
@@ -44,9 +44,9 @@
         var lockedLayers = new Array;
         
         // Find the current start time, set it to 0, set it back at the end if the switch is thrown
-        var oldDispStartFrame = thisComp.displayStartTime*(1/thisComp.frameDuration);
+        var oldDispStart = timeToCurrentFormat(thisComp.displayStartTime, thisComp.frameRate, 0);
         thisComp.displayStartTime = 0;
-
+        
         // Build our layer array based on either all layers or unlocked-only layers
         // Also build an array of locked layers, and unlock them. Will relock later.
         if (useAll == true){
@@ -110,7 +110,7 @@
 
         // Check for preserve toggle, set it back.
         if (preserveStart == true){
-            thisComp.displayStartTime = oldDispStartFrame*thisComp.frameDuration;
+            thisComp.displayStartTime = currentFormatToTime(oldDispStart, thisComp.frameRate, 0) + 0.0001;
         } else {
             thisComp.displayStartTime = 0;
         }
