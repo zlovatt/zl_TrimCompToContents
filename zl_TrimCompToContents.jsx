@@ -4,7 +4,7 @@
     zack@zacklovatt.com
  
     Name: zl_TrimCompToContents
-    Version: 1.0
+    Version: 1.1
  
     Description:
         This script trims or lengthens your current comp to the in & out
@@ -18,9 +18,6 @@
         
 **********************************************************************************************/
 
-    var zl_TCC__ignoreLocked = false;
-    var zl_TCC__preserveCompStart = false;
-    var zl_TCC__useAll = true;
     var zl_TCC__scriptName = "zl_TrimCompToContents";
             
     /****************************** 
@@ -31,11 +28,14 @@
      
         Parameters:
         thisObj - "this" object.
+        useAll - use all layers (vs selected)
+        ignoreLocked - ignore locked layers
+        preserveStart - preserve start time
      
         Returns:
         Nothing.
     ******************************/
-    function zl_TrimCompToContents(thisObj){
+    function zl_TrimCompToContents(thisObj, useAll, ignoreLocked, preserveStart){
 
         var thisComp = app.project.activeItem;
         app.project.activeItem.selected = true;
@@ -49,14 +49,14 @@
 
         // Build our layer array based on either all layers or unlocked-only layers
         // Also build an array of locked layers, and unlock them. Will relock later.
-        if (zl_TCC__useAll == true){
+        if (useAll == true){
             var j = 0;
             var k = 0;
             for (i = 0; i <= thisComp.layers.length-1; i++){ 
-                if (zl_TCC__ignoreLocked == true && thisComp.layers[i+1].locked == false){
+                if (ignoreLocked == true && thisComp.layers[i+1].locked == false){
                     userLayers[j] = thisComp.layers[i+1];
                     j++;
-                } else if (zl_TCC__ignoreLocked == false){
+                } else if (ignoreLocked == false){
                     userLayers[i] = thisComp.layers[i+1];
                     if (thisComp.layers[i+1].locked == true){
                         lockedLayers[k] = thisComp.layers[i+1];
@@ -69,11 +69,11 @@
     
         // Error messages for either no layers selected / no layers detected
         // Otherwise, head on in and let's make some magic.
-        if ((zl_TCC__useAll == true) && (userLayers.length == 0)){
+        if ((useAll == true) && (userLayers.length == 0)){
             alert ("No layers detected!");
-        } else if ((zl_TCC__useAll == false) && (userLayers.length == 0)){
+        } else if ((useAll == false) && (userLayers.length == 0)){
             alert ("No layers selected!");
-            zl_TCC__preserveCompStart = true;
+            preserveStart = true;
         } else {       
             var inTime = zl_TrimCompToContents_getInTime(userLayers);
             var outTime = zl_TrimCompToContents_getOutTime(userLayers);
@@ -103,13 +103,13 @@
             app.executeCommand(app.findMenuCommandId("Trim Comp to Work Area"));
 
             // Re-lock those locked layers
-            if (zl_TCC__useAll == true)
+            if (useAll == true)
                 for (i = 0; i < lockedLayers.length; i++)
                     lockedLayers[i].locked = true;
         }
 
         // Check for preserve toggle, set it back.
-        if (zl_TCC__preserveCompStart == true){
+        if (preserveStart == true){
             thisComp.displayStartTime = oldDispStartFrame*thisComp.frameDuration;
         } else {
             thisComp.displayStartTime = 0;
@@ -206,17 +206,22 @@
         Nothing
      ******************************/
     function zl_TrimCompToContents_createPalette(thisObj) { 
-        var win = (thisObj instanceof Panel) ? thisObj : new Window('palette', 'Trim Comp to Contents',[357,241,607,418]); 
-
+        var win = (thisObj instanceof Panel) ? thisObj : new Window('palette', 'Trim Comp to Contents', undefined); 
+        var useAll = true;
+        var ignoreLocked = false;
+        var preserveStart = false;
+        
         { // Buttons
-            win.trimSelectedButton = win.add('button', [12,19,216,45], 'Trim Comp'); 
+            win.trimSelectedButton = win.add('button', undefined, 'Trim Comp'); 
+            win.trimSelectedButton.alignment = "fill";
+            
             win.trimSelectedButton.onClick = function () {
                 if (app.project) {
                     var activeItem = app.project.activeItem;
                     
                     if (activeItem != null && (activeItem instanceof CompItem)) {
                         app.beginUndoGroup(zl_TCC__scriptName);
-                        zl_TrimCompToContents(thisObj);
+                        zl_TrimCompToContents(thisObj, useAll, ignoreLocked, preserveStart);
                         app.endUndoGroup();
                     } else {
                         alert("Select an active comp!", zl_TCC__scriptName);
@@ -226,28 +231,34 @@
                 }
             } 
         }
-
-
+    
         { // Options
-            win.optionGroup = win.add('panel', [14,64,235,154], 'Options', {borderStyle: "etched"}); 
-        
-            win.trimToAll = win.optionGroup.add('checkbox', [28,10,208,32], 'Trim To All'); 
-            win.trimToAll.value = true; 
-            win.trimToAll.onClick = function(){
-                zl_TCC__useAll = this.value;
-                win.ignoreLockedCheckbox.enabled =this.value;
+            win.optionGroup = win.add('panel', undefined, 'Options', {borderStyle: "etched"}); 
+            win.optionGroup.alignChildren = "left";
+            
+            { // Trim To All 
+                win.optionGroup.trimToAll = win.optionGroup.add('checkbox', undefined, 'Trim To All'); 
+                win.optionGroup.trimToAll.value = true; 
+                win.optionGroup.trimToAll.onClick = function(){
+                    useAll = this.value;
+                    win.optionGroup.ignoreLockedCheckbox.enabled =this.value;
+                }
             }
     
-            win.ignoreLockedCheckbox = win.optionGroup.add('checkbox', [48,30,208,52], 'Ignore Locked Layers');
-            win.ignoreLockedCheckbox.value = false; 
-            win.ignoreLockedCheckbox.onClick = function(){
-                zl_TCC__ignoreLocked = this.value;
+            { // Ignore Locked
+                win.optionGroup.ignoreLockedCheckbox = win.optionGroup.add('checkbox', undefined, 'Ignore Locked Layers');
+                win.optionGroup.ignoreLockedCheckbox.value = false; 
+                win.optionGroup.ignoreLockedCheckbox.onClick = function(){
+                    ignoreLocked = this.value;
+                }
             }
     
-            win.preserveStartCheckbox = win.optionGroup.add('checkbox', [28,55,208,76], 'Preserve Comp Start Time'); 
-            win.preserveStartCheckbox.value = false; 
-            win.preserveStartCheckbox.onClick = function(){
-                zl_TCC__preserveCompStart = this.value;
+            { // Preserve Start
+                win.optionGroup.preserveStartCheckbox = win.optionGroup.add('checkbox', undefined, 'Preserve Comp Start Time'); 
+                win.optionGroup.preserveStartCheckbox.value = false; 
+                win.optionGroup.preserveStartCheckbox.onClick = function(){
+                    preserveStart = this.value;
+                }
             }
         }
     
