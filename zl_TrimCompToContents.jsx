@@ -4,7 +4,7 @@
     zacklovatt.com
  
     Name: zl_TrimCompToContents
-    Version: 0.5
+    Version: 0.6
  
     Description:
         This script trims or lengthens your current comp to the in & out
@@ -18,9 +18,10 @@
         
 **********************************************************************************************/
 
-    var ignoreLocked;
-    var preserveCompStart;
+    var ignoreLocked = false;
+    var preserveCompStart = false;
     var useAll = true;
+    var scriptName = "zl_TrimCompToContents";
     
     /****************************** 
         zl_TrimCompToContents()
@@ -34,21 +35,10 @@
         Returns:
         Nothing.
     ******************************/
-    function zl_TrimCompToContents(thisObj, useAll){
-
-        // Force comp to active
-/*        if (thisObj == null || !(thisObj instanceof CompItem)){
-                        alert("bob");
-
-            var tempWorkDur = thisComp.workAreaDuration;
-            thisComp.workAreaDuration = thisComp.frameDuration * 2;
-            thisComp.ramPreviewTest("",1,"");
-            thisComp.workAreaDuration = tempWorkDur;
-        }*/
-
-        app.beginUndoGroup("zl_TrimCompToContents");
+    function zl_TrimCompToContents(thisObj){
 
         var thisComp = app.project.activeItem;
+        app.project.activeItem.selected = true;
         var layerCount = thisComp.numLayers;
         var userLayers = thisComp.selectedLayers;
         var lockedLayers = new Array;
@@ -62,7 +52,6 @@
         if (useAll == true){
             var j = 0;
             var k = 0;
-            
             for (i = 0; i <= thisComp.layers.length-1; i++){ 
                 if (ignoreLocked == true && thisComp.layers[i+1].locked == false){
                     userLayers[j] = thisComp.layers[i+1];
@@ -72,7 +61,7 @@
                     if (thisComp.layers[i+1].locked == true){
                         lockedLayers[k] = thisComp.layers[i+1];
                         lockedLayers[k].locked = false;
-                        k++
+                        k++;
                     }
                 } 
             }
@@ -84,6 +73,7 @@
             alert ("No layers detected!");
         } else if ((useAll == false) && (userLayers.length == 0)){
             alert ("No layers selected!");
+            preserveCompStart = true;
         } else {       
             var inTime = zl_TrimCompToContents_getInTime(userLayers);
             var outTime = zl_TrimCompToContents_getOutTime(userLayers);
@@ -108,7 +98,7 @@
             thisComp.workAreaDuration = newDur;
             
             app.executeCommand(app.findMenuCommandId("Trim Comp to Work Area"));
-            
+
             // Re-lock those locked layers
             if (useAll == true)
                 for (i = 0; i < lockedLayers.length; i++)
@@ -121,8 +111,6 @@
         } else {
             thisComp.displayStartTime = 0;
         }
-
-        app.endUndoGroup();
     }
 
 
@@ -215,31 +203,45 @@
         Nothing
      ******************************/
     function zl_TrimCompToContents_createPalette(thisObj) { 
-        var win = (thisObj instanceof Panel) ? thisObj : new Window('palette', 'Script Window',[357,241,607,453]); 
+        var win = (thisObj instanceof Panel) ? thisObj : new Window('palette', 'Script Window',[357,241,607,418]); 
 
         { // Trim Buttons
-            win.trimAllButton = win.add('button', [22,19,226,45], 'Trim To All'); 
-            win.trimAllButton.onClick = function () {
-                zl_TrimCompToContents(thisObj, true);
-            } 
             
-            win.trimSelectedButton = win.add('button', [22,59,226,85], 'Trim To Selected'); 
+            win.trimSelectedButton = win.add('button', [22,19,226,45], 'Trim Comp'); 
             win.trimSelectedButton.onClick = function () {
-                zl_TrimCompToContents(thisObj, false);
+                if (app.project) {
+                    var activeItem = app.project.activeItem;
+                    if (activeItem != null && (activeItem instanceof CompItem)) {
+                        app.beginUndoGroup(scriptName);
+                        zl_TrimCompToContents(thisObj, false);
+                        app.endUndoGroup();
+                    } else {
+                        alert("Select an active comp!", scriptName);
+                    }
+                } else {
+                    alert("Open a project!", scriptName);
+                }
             } 
         }
 
 
-        { // Advanced Options
-            win.optionGroup = win.add('panel', [14,104,235,193], 'Advanced Options', {borderStyle: "etched"}); 
+        { // Options
+            win.optionGroup = win.add('panel', [14,64,235,154], 'Options', {borderStyle: "etched"}); 
         
-            win.ignoreLockedCheckbox = win.optionGroup.add('checkbox', [28,19,208,41], 'Ignore Locked Layers'); 
+            win.trimToAll = win.optionGroup.add('checkbox', [28,10,208,32], 'Trim To All'); 
+            win.trimToAll.value = true; 
+            win.trimToAll.onClick = function(){
+                useAll = this.value;
+                win.ignoreLockedCheckbox.enabled =this.value;
+            }
+    
+            win.ignoreLockedCheckbox = win.optionGroup.add('checkbox', [48,30,208,52], 'Ignore Locked Layers');
             win.ignoreLockedCheckbox.value = false; 
             win.ignoreLockedCheckbox.onClick = function(){
                 ignoreLocked = this.value;
             }
     
-            win.preserveStartCheckbox = win.optionGroup.add('checkbox', [28,49,208,71], 'Preserve Comp Start Time'); 
+            win.preserveStartCheckbox = win.optionGroup.add('checkbox', [28,55,208,76], 'Preserve Comp Start Time'); 
             win.preserveStartCheckbox.value = false; 
             win.preserveStartCheckbox.onClick = function(){
                 preserveCompStart = this.value;
