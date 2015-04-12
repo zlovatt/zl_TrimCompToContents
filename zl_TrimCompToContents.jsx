@@ -4,7 +4,7 @@
     zacklovatt.com
  
     Name: zl_TrimCompToContents
-    Version: 0.6
+    Version: 0.7
  
     Description:
         This script trims or lengthens your current comp to the in & out
@@ -92,6 +92,9 @@
                 newDur = thisComp.frameDuration;
             if  ((inTime + newDur) > thisComp.duration)
                 thisComp.duration += 1;
+            if (thisComp.duration < outTime){
+                thisComp.duration = newDur + inTime + 1;
+            }
 
             // Set work area & trim!
             thisComp.workAreaStart = inTime;
@@ -273,5 +276,5 @@
     }
 
     // RUN!
-    //zl_TrimCompToContents(this);
-    zl_TrimCompToContents_main(this);
+    // zl_TrimCompToContents(this); // <= This runs the script with default options, usually for debug
+    zl_TrimCompToContents_main(this); // <= This brings up the panel
