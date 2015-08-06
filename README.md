@@ -1,5 +1,5 @@
 ### zl_TrimCompToContents
-#### Version: 1.3
+#### Version: 1.4
 ##### Copyright (c) 2015 Zack Lovatt (zack@zacklovatt.com). All rights reserved.
 
 This script is provided "as is," without warranty of any kind, expressed
@@ -9,14 +9,10 @@ arising in any way from the use of this script.
 -----------------------
 ##### Description
 
-This script sets the label colour for all selected items as specified.
-If a folder is in the selection, the script will recursively search through
-and find all items within that folder.
+This script trims or lengthens your current comp to the in & out
+points of its contents.
 
-Useful for when importing existing projects/AEPs, to set the label colour
-in one fell swoop for all imported objects.
-
-Originally requested by Ronald Molina (ronalith.com)
+Originally requested by Alan Fregtman (darkvertex.com)
 
 -----------------------
 ##### Installation
@@ -32,7 +28,8 @@ If the ScriptUI Panels folder does not exist, create it.
 
 ##### Changelog
 
-* 1.3 - 06/08/15 - Added recursion, integrated headless functionality into the main file
+* 1.4 - 06/08/15 - Added recursion, integrated headless functionality into the main file
+* 1.3 - 19/06/14 - Fixed a bug occuring with non-English installs of AE
 * 1.2 - 10/02/14 - Preserve start time bug fixed, headless controls now work properly
 * 1.1 - Cleaned up code, improved headless version
 * 1.0 - Initial Release
