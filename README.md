@@ -32,7 +32,7 @@ If the ScriptUI Panels folder does not exist, create it.
 
 ##### Changelog
 
-* 1.3 - 06/08/15 - Added recursion
+* 1.3 - 06/08/15 - Added recursion, integrated headless functionality into the main file
 * 1.2 - 10/02/14 - Preserve start time bug fixed, headless controls now work properly
 * 1.1 - Cleaned up code, improved headless version
 * 1.0 - Initial Release

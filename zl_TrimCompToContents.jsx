@@ -19,16 +19,18 @@
 **********************************************************************************************/
 
 function zl_TCC (thisObj) {
+
     var zl_TCC__scriptName = "zl_TrimCompToContents";
 
     /******************************
-        zl_TCC ()
+        zl_TrimComptoContents ()
 
         Description:
         This function contains the main logic for this script.
 
         Parameters:
-        thisObj - "this" object.
+        thisComp - target comp
+        recurse - whether to crop precomps
         useAll - use all layers (vs selected)
         ignoreLocked - ignore locked layers
         preserveStart - preserve start time
@@ -36,41 +38,39 @@ function zl_TCC (thisObj) {
         Returns:
         Nothing.
     ******************************/
-    function zl_TrimComptoContents (thisComp, useAll, ignoreLocked, preserveStart){
+    function zl_TrimComptoContents (thisComp, recurse, useAll, ignoreLocked, preserveStart){
 
         var layerCount = thisComp.numLayers;
         var userLayers = thisComp.selectedLayers;
-        var lockedLayers = new Array;
+        var lockedLayers = [];
 
         // Find the current start time, set it to 0, set it back at the end if the switch is thrown
         var oldDispStart = timeToCurrentFormat(thisComp.displayStartTime, thisComp.frameRate, 0);
         thisComp.displayStartTime = 0;
 
         // Recurse!
-        for (var i = 1; i <= layerCount; i++) {
-        	var thisLayer = thisComp.layers[i];
-        	if (thisLayer.source instanceof CompItem){
-        		thisLayer.source.openInViewer();
-        		zl_TrimComptoContents(thisLayer.source, useAll, ignoreLocked, preserveStart);
-        		thisComp.openInViewer();
+        if (recurse == true)
+        	for (var i = 1; i <= layerCount; i++) {
+	        	var thisLayer = thisComp.layers[i];
+        		if (thisLayer.source instanceof CompItem){
+	        		thisLayer.source.openInViewer();
+        			zl_TrimComptoContents(thisLayer.source, recurse, useAll, ignoreLocked, preserveStart);
+        			thisComp.openInViewer();
+        		}
         	}
-        }
 
         // Build our layer array based on either all layers or unlocked-only layers
         // Also build an array of locked layers, and unlock them. Will relock later.
         if (useAll == true){
-            var j = 0;
-            var k = 0;
             for (i = 0; i <= thisComp.layers.length-1; i++){
-                if (ignoreLocked == true && thisComp.layers[i+1].locked == false){
-                    userLayers[j] = thisComp.layers[i+1];
-                    j++;
+            	var curLayer = thisComp.layers[i+1];
+                if (ignoreLocked == true && curLayer.locked == false){
+                    userLayers.push(curLayer);
                 } else if (ignoreLocked == false){
-                    userLayers[i] = thisComp.layers[i+1];
-                    if (thisComp.layers[i+1].locked == true){
-                        lockedLayers[k] = thisComp.layers[i+1];
-                        lockedLayers[k].locked = false;
-                        k++;
+                    userLayers[i] = curLayer;
+                    if (curLayer.locked == true){
+                        curLayer.locked = false;
+                        lockedLayers.push(curLayer);
                     }
                 }
             }
@@ -113,7 +113,7 @@ function zl_TCC (thisObj) {
             app.executeCommand(2360);
 
             // Re-lock those locked layers
-            if (useAll == true)
+            if (ignoreLocked == false)
                 for (i = 0; i < lockedLayers.length; i++)
                     lockedLayers[i].locked = true;
         }
@@ -215,11 +215,12 @@ function zl_TCC (thisObj) {
         Returns:
         Nothing
      ******************************/
-    function zl_TCC_createPalette(thisObj) {
-        var win = (thisObj instanceof Panel) ? thisObj : new Window('palette', 'Trim Comp to Contents', undefined);
+    function zl_TCC_createPalette (thisObj) {
+        var win = (thisObj instanceof Panel) ? thisObj : new Window('palette', zl_TCC__scriptName, undefined);
         var useAll = true;
         var ignoreLocked = false;
         var preserveStart = false;
+        var recurse = true;
 
         { // Buttons
             win.trimSelectedButton = win.add('button', undefined, 'Trim Comp');
@@ -231,7 +232,7 @@ function zl_TCC (thisObj) {
 
                     if (thisComp != null && (thisComp instanceof CompItem)) {
                         app.beginUndoGroup(zl_TCC__scriptName);
-                        zl_TrimComptoContents(thisComp, useAll, ignoreLocked, preserveStart);
+                        zl_TrimComptoContents(thisComp, recurse, useAll, ignoreLocked, preserveStart);
                         app.endUndoGroup();
                     } else {
                         alert("Select an active comp!", zl_TCC__scriptName);
@@ -263,6 +264,14 @@ function zl_TCC (thisObj) {
                 }
             }
 
+            { // Recurse
+                win.optionGroup.recurse = win.optionGroup.add('checkbox', undefined, 'Crop Nested Comps');
+                win.optionGroup.recurse.value = true;
+                win.optionGroup.recurse.onClick = function(){
+                    recurse = this.value;
+                }
+            }
+
             { // Preserve Start
                 win.optionGroup.preserveStartCheckbox = win.optionGroup.add('checkbox', undefined, 'Preserve Comp Start Time');
                 win.optionGroup.preserveStartCheckbox.value = false;
@@ -272,11 +281,7 @@ function zl_TCC (thisObj) {
             }
         }
 
-        if (win instanceof Window) {
-            win.show();
-        } else {
-            win.layout.layout(true);
-        }
+        return win;
     } // end function createPalette
 
 
@@ -293,11 +298,46 @@ function zl_TCC (thisObj) {
         Nothing
      ******************************/
     function zl_TCC_main(thisObj) {
-        zl_TCC_createPalette(thisObj);
+
+        var myPalette = zl_TCC_createPalette(thisObj);
+
+        if (myPalette != null){
+            if (myPalette instanceof Window){
+
+		        var useAll = true;
+		        var ignoreLocked = false;
+		        var preserveStart = false;
+        		var recurse = true;
+
+		        if (ScriptUI.environment.keyboardState.altKey)
+		            useAll = false;
+
+		        if (ScriptUI.environment.keyboardState.shiftKey)
+		            ignoreLocked = true;
+
+		        if ((ScriptUI.environment.keyboardState.ctrlKey) || (ScriptUI.environment.keyboardState.metaKey))
+		            preserveStart = true;
+
+                if (app.project) {
+                    var thisComp = app.project.activeItem;
+
+                    if (thisComp != null && (thisComp instanceof CompItem)) {
+                        app.beginUndoGroup(zl_TCC__scriptName);
+                        zl_TrimComptoContents(thisComp, recurse, useAll, ignoreLocked, preserveStart);
+                        app.endUndoGroup();
+					} else {
+                        alert("Select an active comp!", zl_TCC__scriptName);
+                    }
+                } else {
+                    alert("Open a project!", zl_TCC__scriptName);
+                }
+            } else {
+                myPalette.layout.layout(true);
+            }
+        }
     } // end function main
 
     // RUN!
-    // zl_TCC(this); // <= This runs the script with default options, usually for debug
     zl_TCC_main(this); // <= This brings up the panel
 
 } // end zl_TCC
