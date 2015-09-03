@@ -338,7 +338,7 @@ function zl_TCC (thisObj) {
     } // end function main
 
     // RUN!
-    zl_TCC_main(this); // <= This brings up the panel
+    zl_TCC_main(thisObj); // <= This brings up the panel
 
 } // end zl_TCC
 
