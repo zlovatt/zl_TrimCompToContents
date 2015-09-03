@@ -50,7 +50,7 @@ function zl_TCC (thisObj) {
 
         // Recurse!
         if (recurse == true)
-        	for (var i = 1; i <= layerCount; i++) {
+        	for (var i = 1, il = layerCount; i <= il; i++) {
 	        	var thisLayer = thisComp.layers[i];
         		if (thisLayer.source instanceof CompItem){
 	        		thisLayer.source.openInViewer();
@@ -62,7 +62,7 @@ function zl_TCC (thisObj) {
         // Build our layer array based on either all layers or unlocked-only layers
         // Also build an array of locked layers, and unlock them. Will relock later.
         if (useAll == true){
-            for (i = 0; i <= thisComp.layers.length-1; i++){
+            for (var i = 0, il = thisComp.layers.length-1; i <= il; i++){
             	var curLayer = thisComp.layers[i+1];
                 if (ignoreLocked == true && curLayer.locked == false){
                     userLayers.push(curLayer);
@@ -114,7 +114,7 @@ function zl_TCC (thisObj) {
 
             // Re-lock those locked layers
             if (ignoreLocked == false)
-                for (i = 0; i < lockedLayers.length; i++)
+                for (var i = 0, il = lockedLayers.length; i < il; i++)
                     lockedLayers[i].locked = true;
         }
 
@@ -142,7 +142,7 @@ function zl_TCC (thisObj) {
     function zl_TCC_getInTime(targetLayers){
         var layerIndex = 0;
 
-        for (i = 0; i <= targetLayers.length-1; i++)
+        for (var i = 0, il = targetLayers.length-1; i <= il; i++)
             if (targetLayers[i].inPoint < targetLayers[layerIndex].inPoint)
                 layerIndex = i;
 
@@ -165,7 +165,7 @@ function zl_TCC (thisObj) {
     function zl_TCC_getOutTime(targetLayers){
         var layerIndex = 0;
 
-        for (i = 0; i <= targetLayers.length-1; i++)
+        for (var i = 0, il = targetLayers.length-1; i <= il; i++)
             if (targetLayers[i].outPoint > targetLayers[layerIndex].outPoint)
                 layerIndex = i;
 
@@ -193,7 +193,7 @@ function zl_TCC (thisObj) {
         var startTimeFrames = 0;
         var totalFrames = 0;
 
-        for (i = 0; i <= targetLayers.length-1; i++){
+        for (var i = 0, il = targetLayers.length-1; i <= il; i++){
             startTimeFrames = targetLayers[i].startTime*compFPS;
             totalFrames = startTimeFrames + shiftFrames;
 
@@ -338,7 +338,7 @@ function zl_TCC (thisObj) {
     } // end function main
 
     // RUN!
-    zl_TCC_main(this); // <= This brings up the panel
+    zl_TCC_main(thisObj); // <= This brings up the panel
 
 } // end zl_TCC
 

@@ -12,6 +12,8 @@ arising in any way from the use of this script.
 This script trims or lengthens your current comp to the in & out
 points of its contents.
 
+Submit bugs & features either on aescripts or at https://bitbucket.org/zlovatt/zl_trimcomptocontents/
+
 Originally requested by Alan Fregtman (darkvertex.com)
 
 -----------------------
